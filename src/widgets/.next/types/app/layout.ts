@@ -1,4 +1,4 @@
-// File: C:\Users\adith\nitroprojects\medtriage-mcp\src\widgets\app\layout.tsx
+// File: C:\Users\KRISHNA\AgenticAIHackathon\src\widgets\app\layout.tsx
 import * as entry from '../../../app/layout.js'
 import type { ResolvingMetadata, ResolvingViewport } from 'next/dist/lib/metadata/types/metadata-interface.js'
 
