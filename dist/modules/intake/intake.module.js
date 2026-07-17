@@ -5,14 +5,15 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
     return c > 3 && r && Object.defineProperty(target, key, r), r;
 };
 import { Module } from '@nitrostack/core';
-import { IntakeTools } from './intake.tools.js';
+import { SubmitPatientIntakeTool } from './intake.tools.js';
+import { GetPatientRecordTool } from './intake.tools.js';
 let IntakeModule = class IntakeModule {
 };
 IntakeModule = __decorate([
     Module({
         name: 'intake',
-        description: 'Patient intake management and record storage',
-        controllers: [IntakeTools],
+        description: 'Patient intake and record management',
+        controllers: [SubmitPatientIntakeTool, GetPatientRecordTool]
     })
 ], IntakeModule);
 export { IntakeModule };

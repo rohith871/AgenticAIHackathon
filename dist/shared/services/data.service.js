@@ -7,8 +7,10 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
 import { Injectable } from '@nitrostack/core';
 import * as fs from 'fs';
 import * as path from 'path';
+import { v4 as uuidv4 } from 'uuid';
 let DataService = class DataService {
     seedData = null;
+    patients = new Map();
     loadSeedData() {
         if (this.seedData) {
             return this.seedData;
@@ -66,6 +68,28 @@ let DataService = class DataService {
                 imageUrl: d.imageUrl
             };
         });
+    }
+    // Patient intake methods
+    storePatientRecord(input) {
+        const patientId = uuidv4();
+        const record = {
+            id: patientId,
+            name: input.name,
+            age: input.age,
+            weight: input.weight,
+            symptoms: input.symptoms,
+            medicalHistory: input.medicalHistory,
+            createdAt: new Date().toISOString()
+        };
+        this.patients.set(patientId, record);
+        return patientId;
+    }
+    getPatientRecord(patientId) {
+        const record = this.patients.get(patientId);
+        if (!record) {
+            throw new Error(`Patient record not found for ID: ${patientId}`);
+        }
+        return record;
     }
 };
 DataService = __decorate([

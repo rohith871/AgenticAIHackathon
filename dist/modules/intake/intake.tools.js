@@ -7,40 +7,109 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
 var __metadata = (this && this.__metadata) || function (k, v) {
     if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
 };
-import { ToolDecorator as Tool, z } from '@nitrostack/core';
-export class IntakeTools {
-    async registerPatientIntake(input, ctx) {
+import { ToolDecorator as Tool, z, Injectable } from '@nitrostack/core';
+import { DataService } from '../../shared/services/data.service.js';
+let SubmitPatientIntakeTool = class SubmitPatientIntakeTool {
+    dataService;
+    constructor(dataService) {
+        this.dataService = dataService;
+    }
+    async submitPatientIntake(input, ctx) {
+        const patientId = this.dataService.storePatientRecord(input);
         return {
-            success: true,
-            recordId: `intake-${Date.now()}`,
-            message: 'Patient intake registered successfully'
+            patientId,
+            message: 'Patient intake submitted successfully'
         };
     }
-}
+};
 __decorate([
     Tool({
-        name: 'register_patient_intake',
-        description: 'Register patient intake details',
+        name: 'submit-patient-intake',
+        description: 'Submit a patient intake form with personal and medical information. Returns a unique patient ID.',
         inputSchema: z.object({
-            patientId: z.string().describe('The unique ID of the patient'),
-            symptoms: z.array(z.string()).describe('List of symptoms reported by the patient'),
-            urgency: z.enum(['low', 'medium', 'high', 'critical']).describe('Calculated or reported urgency level')
+            name: z.string().describe('Patient full name'),
+            age: z.number().int().min(0).max(150).describe('Patient age in years'),
+            weight: z.number().positive().describe('Patient weight in kg'),
+            symptoms: z.array(z.string()).describe('List of current symptoms'),
+            medicalHistory: z.object({
+                conditions: z.array(z.string()).optional().describe('Pre-existing medical conditions'),
+                medications: z.array(z.string()).optional().describe('Current medications'),
+                allergies: z.array(z.string()).optional().describe('Known allergies')
+            }).optional().describe('Optional medical history')
         }),
         examples: {
             request: {
-                patientId: 'patient-001',
-                symptoms: ['headache', 'fever'],
-                urgency: 'medium'
+                name: 'John Doe',
+                age: 35,
+                weight: 75,
+                symptoms: ['fever', 'cough'],
+                medicalHistory: {
+                    conditions: ['hypertension'],
+                    medications: ['lisinopril'],
+                    allergies: ['penicillin']
+                }
             },
             response: {
-                success: true,
-                recordId: 'intake-001',
-                message: 'Patient intake registered successfully'
+                patientId: '550e8400-e29b-41d4-a716-446655440000',
+                message: 'Patient intake submitted successfully'
             }
         }
     }),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", [Object, Object]),
     __metadata("design:returntype", Promise)
-], IntakeTools.prototype, "registerPatientIntake", null);
+], SubmitPatientIntakeTool.prototype, "submitPatientIntake", null);
+SubmitPatientIntakeTool = __decorate([
+    Injectable({ deps: [DataService] }),
+    __metadata("design:paramtypes", [DataService])
+], SubmitPatientIntakeTool);
+export { SubmitPatientIntakeTool };
+let GetPatientRecordTool = class GetPatientRecordTool {
+    dataService;
+    constructor(dataService) {
+        this.dataService = dataService;
+    }
+    async getPatientRecord(input, ctx) {
+        try {
+            const record = this.dataService.getPatientRecord(input.patientId);
+            return record;
+        }
+        catch (error) {
+            throw new Error(`Failed to retrieve patient record: ${error instanceof Error ? error.message : 'Unknown error'}`);
+        }
+    }
+};
+__decorate([
+    Tool({
+        name: 'get-patient-record',
+        description: 'Retrieve a stored patient record by patient ID.',
+        inputSchema: z.object({
+            patientId: z.string().uuid().describe('The unique patient ID')
+        }),
+        examples: {
+            request: { patientId: '550e8400-e29b-41d4-a716-446655440000' },
+            response: {
+                id: '550e8400-e29b-41d4-a716-446655440000',
+                name: 'John Doe',
+                age: 35,
+                weight: 75,
+                symptoms: ['fever', 'cough'],
+                medicalHistory: {
+                    conditions: ['hypertension'],
+                    medications: ['lisinopril'],
+                    allergies: ['penicillin']
+                },
+                createdAt: '2026-07-17T12:00:00.000Z'
+            }
+        }
+    }),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Object, Object]),
+    __metadata("design:returntype", Promise)
+], GetPatientRecordTool.prototype, "getPatientRecord", null);
+GetPatientRecordTool = __decorate([
+    Injectable({ deps: [DataService] }),
+    __metadata("design:paramtypes", [DataService])
+], GetPatientRecordTool);
+export { GetPatientRecordTool };
 //# sourceMappingURL=intake.tools.js.map

@@ -4,6 +4,7 @@ import * as path from 'path';
 import { Hospital } from '../schemas/hospital.schema.js';
 import { Specialty } from '../schemas/specialty.schema.js';
 import { Doctor } from '../schemas/doctor.schema.js';
+import { v4 as uuidv4 } from 'uuid';
 
 interface SeedData {
   hospitals: Hospital[];
@@ -11,9 +12,24 @@ interface SeedData {
   doctors: Doctor[];
 }
 
+export interface PatientRecord {
+  id: string;
+  name: string;
+  age: number;
+  weight: number;
+  symptoms: string[];
+  medicalHistory?: {
+    conditions?: string[];
+    medications?: string[];
+    allergies?: string[];
+  };
+  createdAt: string;
+}
+
 @Injectable()
 export class DataService {
   private seedData: SeedData | null = null;
+  private patients: Map<string, PatientRecord> = new Map();
 
   private loadSeedData(): SeedData {
     if (this.seedData) {
@@ -86,5 +102,39 @@ export class DataService {
         imageUrl: d.imageUrl
       };
     });
+  }
+
+  // Patient intake methods
+  storePatientRecord(input: {
+    name: string;
+    age: number;
+    weight: number;
+    symptoms: string[];
+    medicalHistory?: {
+      conditions?: string[];
+      medications?: string[];
+      allergies?: string[];
+    };
+  }): string {
+    const patientId = uuidv4();
+    const record: PatientRecord = {
+      id: patientId,
+      name: input.name,
+      age: input.age,
+      weight: input.weight,
+      symptoms: input.symptoms,
+      medicalHistory: input.medicalHistory,
+      createdAt: new Date().toISOString()
+    };
+    this.patients.set(patientId, record);
+    return patientId;
+  }
+
+  getPatientRecord(patientId: string): PatientRecord {
+    const record = this.patients.get(patientId);
+    if (!record) {
+      throw new Error(`Patient record not found for ID: ${patientId}`);
+    }
+    return record;
   }
 }

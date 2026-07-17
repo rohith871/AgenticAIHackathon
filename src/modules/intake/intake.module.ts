@@ -1,9 +1,10 @@
 import { Module } from '@nitrostack/core';
-import { IntakeTools } from './intake.tools.js';
+import { SubmitPatientIntakeTool } from './intake.tools.js';
+import { GetPatientRecordTool } from './intake.tools.js';
 
 @Module({
   name: 'intake',
-  description: 'Patient intake management and record storage',
-  controllers: [IntakeTools],
+  description: 'Patient intake and record management',
+  controllers: [SubmitPatientIntakeTool, GetPatientRecordTool]
 })
 export class IntakeModule {}
