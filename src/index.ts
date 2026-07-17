@@ -23,7 +23,8 @@ async function bootstrap() {
 }
 
 // Start the application
-bootstrap().catch((error) => {
-  console.error('❌ Failed to start server:', error);
+bootstrap().catch(() => {
+  // Do NOT use console.* — it corrupts the MCP JSON-RPC stream over STDIO
+  // The framework logger will handle errors internally
   process.exit(1);
 });

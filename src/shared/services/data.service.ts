@@ -21,6 +21,8 @@ interface IntakeRecord {
   symptoms: string[];
   urgency: string;
   timestamp: string;
+}
+
 export interface PatientRecord {
   id: string;
   name: string;
@@ -120,6 +122,8 @@ export class DataService {
 
   getIntakeRecord(recordId: string): IntakeRecord | undefined {
     return this.intakeRecords.get(recordId);
+  }
+
   // Patient intake methods
   storePatientRecord(input: {
     name: string;

@@ -44,8 +44,8 @@ export declare class DiscoveryTools {
         date: string;
     }, context: ExecutionContext): Promise<{
         appointments: {
-            id: string;
             status: "scheduled" | "completed" | "cancelled";
+            id: string;
             patientId: string;
             doctorId: string;
             hospitalId: string;

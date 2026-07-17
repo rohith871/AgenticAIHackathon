@@ -29,6 +29,6 @@ export declare class GetPatientRecordTool {
     constructor(dataService: DataService);
     getPatientRecord(input: {
         patientId: string;
-    }, ctx: ExecutionContext): Promise<any>;
+    }, ctx: ExecutionContext): Promise<import("../../shared/services/data.service.js").PatientRecord>;
 }
 //# sourceMappingURL=intake.tools.d.ts.map
