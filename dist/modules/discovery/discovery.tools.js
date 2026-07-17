@@ -9,15 +9,18 @@ var __metadata = (this && this.__metadata) || function (k, v) {
 };
 import { ToolDecorator as Tool, z, Injectable, Widget } from '@nitrostack/core';
 import { DataService } from '../../shared/services/data.service.js';
+import { AppointmentService } from '../../shared/services/appointment.service.js';
 /**
  * Discovery Tools
  *
- * Tools for browsing hospitals and medical specialties
+ * Tools for browsing hospitals, medical specialties, and appointments
  */
 let DiscoveryTools = class DiscoveryTools {
     dataService;
-    constructor(dataService) {
+    appointmentService;
+    constructor(dataService, appointmentService) {
         this.dataService = dataService;
+        this.appointmentService = appointmentService;
     }
     async listHospitals(input, context) {
         const hospitals = this.dataService.getHospitals();
@@ -40,6 +43,18 @@ let DiscoveryTools = class DiscoveryTools {
                 description: s.description,
                 imageUrl: s.imageUrl,
             })),
+        };
+    }
+    async searchDoctors(input, context) {
+        const doctors = this.dataService.searchDoctors(input.specialty);
+        return {
+            doctors
+        };
+    }
+    async filterAppointments(input, context) {
+        const appointments = this.appointmentService.filterAppointmentsByDate(input.date);
+        return {
+            appointments
         };
     }
 };
@@ -65,9 +80,68 @@ __decorate([
     __metadata("design:paramtypes", [Object, Object]),
     __metadata("design:returntype", Promise)
 ], DiscoveryTools.prototype, "listSpecialties", null);
+__decorate([
+    Tool({
+        name: 'search-doctors',
+        description: 'Search for doctors by medical specialty name or ID',
+        inputSchema: z.object({
+            specialty: z.string().describe('The name or ID of the specialty, e.g. Cardiology')
+        }),
+        examples: {
+            request: { specialty: 'Cardiology' },
+            response: {
+                doctors: [
+                    {
+                        id: 'doctor-001',
+                        name: 'Dr. Sarah Mitchell',
+                        specialtyId: 'cardiology',
+                        specialtyName: 'Cardiology',
+                        hospitalId: 'hospital-001',
+                        hospitalName: 'Metropolitan Medical Center',
+                        imageUrl: 'https://images.unsplash.com/...'
+                    }
+                ]
+            }
+        }
+    }),
+    Widget({ route: 'doctor-profiles' }),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Object, Object]),
+    __metadata("design:returntype", Promise)
+], DiscoveryTools.prototype, "searchDoctors", null);
+__decorate([
+    Tool({
+        name: 'filter-appointments-by-date',
+        description: 'Filter scheduled appointments by a specific date (YYYY-MM-DD)',
+        inputSchema: z.object({
+            date: z.string().describe('The date to filter appointments for (format: YYYY-MM-DD, e.g. 2026-07-18)')
+        }),
+        examples: {
+            request: { date: '2026-07-18' },
+            response: {
+                appointments: [
+                    {
+                        id: 'apt-001',
+                        patientId: 'patient-001',
+                        doctorId: 'doctor-001',
+                        hospitalId: 'hospital-001',
+                        specialtyId: 'cardiology',
+                        dateTime: '2026-07-18T10:00:00Z',
+                        status: 'scheduled',
+                        notes: 'Routine cardiovascular follow-up'
+                    }
+                ]
+            }
+        }
+    }),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Object, Object]),
+    __metadata("design:returntype", Promise)
+], DiscoveryTools.prototype, "filterAppointments", null);
 DiscoveryTools = __decorate([
-    Injectable({ deps: [DataService] }),
-    __metadata("design:paramtypes", [DataService])
+    Injectable({ deps: [DataService, AppointmentService] }),
+    __metadata("design:paramtypes", [DataService,
+        AppointmentService])
 ], DiscoveryTools);
 export { DiscoveryTools };
 //# sourceMappingURL=discovery.tools.js.map

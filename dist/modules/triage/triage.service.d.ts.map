@@ -1,0 +1,1 @@
+{"version":3,"file":"triage.service.d.ts","sourceRoot":"","sources":["../../../src/modules/triage/triage.service.ts"],"names":[],"mappings":"AAEA,MAAM,WAAW,YAAY;IAC3B,OAAO,EAAE,KAAK,GAAG,QAAQ,GAAG,MAAM,GAAG,UAAU,CAAC;IAChD,sBAAsB,EAAE,MAAM,CAAC;IAC/B,wBAAwB,EAAE,MAAM,CAAC;IACjC,KAAK,EAAE,MAAM,CAAC;CACf;AAED,qBACa,aAAa;IACxB,eAAe,CAAC,QAAQ,EAAE,MAAM,EAAE,GAAG,YAAY;CA8ElD"}

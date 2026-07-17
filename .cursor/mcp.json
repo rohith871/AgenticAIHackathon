@@ -7,6 +7,12 @@
         "@modelcontextprotocol/server-filesystem",
         "c:\\Users\\adith\\nitroprojects\\medtriage-mcp"
       ]
+    },
+    "medtriage-mcp": {
+      "command": "node",
+      "args": [
+        "c:\\Users\\adith\\nitroprojects\\medtriage-mcp\\dist\\index.js"
+      ]
     }
   }
 }

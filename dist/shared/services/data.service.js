@@ -46,6 +46,27 @@ let DataService = class DataService {
         const data = this.loadSeedData();
         return data.doctors.filter((d) => d.hospital === hospitalId);
     }
+    searchDoctors(specialtyQuery) {
+        const data = this.loadSeedData();
+        const query = specialtyQuery.toLowerCase();
+        // Find matching specialty
+        const specialty = data.specialties.find((s) => s.id.toLowerCase() === query || s.name.toLowerCase() === query);
+        if (!specialty)
+            return [];
+        const doctors = data.doctors.filter((d) => d.specialty === specialty.id);
+        return doctors.map((d) => {
+            const hospital = data.hospitals.find((h) => h.id === d.hospital);
+            return {
+                id: d.id,
+                name: d.name,
+                specialtyId: specialty.id,
+                specialtyName: specialty.name,
+                hospitalId: d.hospital,
+                hospitalName: hospital ? hospital.name : 'Unknown Hospital',
+                imageUrl: d.imageUrl
+            };
+        });
+    }
 };
 DataService = __decorate([
     Injectable()

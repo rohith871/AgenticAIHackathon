@@ -8,6 +8,10 @@ import { McpApp, Module, ConfigModule } from '@nitrostack/core';
 import { CalculatorModule } from './modules/calculator/calculator.module.js';
 import { DiscoveryModule } from './modules/discovery/discovery.module.js';
 import { ReferenceModule } from './modules/reference/reference.module.js';
+import { FilesystemModule } from './modules/filesystem/filesystem.module.js';
+import { IntakeModule } from './modules/intake/intake.module.js';
+import { TriageModule } from './modules/triage/triage.module.js';
+import { BookingModule } from './modules/booking/booking.module.js';
 import { SystemHealthCheck } from './health/system.health.js';
 /**
  * Root Application Module
@@ -35,7 +39,11 @@ AppModule = __decorate([
             ConfigModule.forRoot(),
             CalculatorModule,
             DiscoveryModule,
-            ReferenceModule
+            ReferenceModule,
+            FilesystemModule,
+            IntakeModule,
+            TriageModule,
+            BookingModule
         ],
         providers: [
             // Health Checks
