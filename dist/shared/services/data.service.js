@@ -75,27 +75,42 @@ let DataService = class DataService {
     }
     getIntakeRecord(recordId) {
         return this.intakeRecords.get(recordId);
-    // Patient intake methods
-    storePatientRecord(input) {
-        const patientId = uuidv4();
-        const record = {
-            id: patientId,
-            name: input.name,
-            age: input.age,
-            weight: input.weight,
-            symptoms: input.symptoms,
-            medicalHistory: input.medicalHistory,
-            createdAt: new Date().toISOString()
-        };
-        this.patients.set(patientId, record);
-        return patientId;
-    }
-    getPatientRecord(patientId) {
-        const record = this.patients.get(patientId);
-        if (!record) {
-            throw new Error(`Patient record not found for ID: ${patientId}`);
+        // Patient intake methods
+        storePatientRecord(input, {
+            name: string,
+            age: number,
+            weight: number,
+            symptoms: string[],
+            medicalHistory: {
+                conditions: string[],
+                medications: string[],
+                allergies: string[]
+            }
+        });
+        string;
+        {
+            const patientId = uuidv4();
+            const record = {
+                id: patientId,
+                name: input.name,
+                age: input.age,
+                weight: input.weight,
+                symptoms: input.symptoms,
+                medicalHistory: input.medicalHistory,
+                createdAt: new Date().toISOString()
+            };
+            this.patients.set(patientId, record);
+            return patientId;
         }
-        return record;
+        getPatientRecord(patientId, string);
+        PatientRecord;
+        {
+            const record = this.patients.get(patientId);
+            if (!record) {
+                throw new Error(`Patient record not found for ID: ${patientId}`);
+            }
+            return record;
+        }
     }
 };
 DataService = __decorate([

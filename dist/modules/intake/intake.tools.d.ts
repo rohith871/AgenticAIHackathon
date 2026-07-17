@@ -1,26 +1,11 @@
 import { ExecutionContext } from '@nitrostack/core';
 import { DataService } from '../../shared/services/data.service.js';
-export declare class IntakeTools {
+export declare class SubmitPatientIntakeTool {
     private dataService;
     constructor(dataService: DataService);
     submitPatientIntake(input: any, ctx: ExecutionContext): Promise<{
         success: boolean;
         recordId: string;
-export declare class SubmitPatientIntakeTool {
-    private dataService;
-    constructor(dataService: DataService);
-    submitPatientIntake(input: {
-        name: string;
-        age: number;
-        weight: number;
-        symptoms: string[];
-        medicalHistory?: {
-            conditions?: string[];
-            medications?: string[];
-            allergies?: string[];
-        };
-    }, ctx: ExecutionContext): Promise<{
-        patientId: string;
         message: string;
     }>;
     getPatientRecord(input: any, ctx: ExecutionContext): Promise<{
@@ -44,6 +29,6 @@ export declare class GetPatientRecordTool {
     constructor(dataService: DataService);
     getPatientRecord(input: {
         patientId: string;
-    }, ctx: ExecutionContext): Promise<import("../../shared/services/data.service.js").PatientRecord>;
+    }, ctx: ExecutionContext): Promise<any>;
 }
 //# sourceMappingURL=intake.tools.d.ts.map
