@@ -11,9 +11,21 @@ interface SeedData {
   doctors: Doctor[];
 }
 
+interface IntakeRecord {
+  recordId: string;
+  name: string;
+  age: number;
+  weight: number;
+  patientId: string;
+  symptoms: string[];
+  urgency: string;
+  timestamp: string;
+}
+
 @Injectable()
 export class DataService {
   private seedData: SeedData | null = null;
+  private intakeRecords: Map<string, IntakeRecord> = new Map();
 
   private loadSeedData(): SeedData {
     if (this.seedData) {
@@ -86,5 +98,13 @@ export class DataService {
         imageUrl: d.imageUrl
       };
     });
+  }
+
+  storeIntakeRecord(record: IntakeRecord): void {
+    this.intakeRecords.set(record.recordId, record);
+  }
+
+  getIntakeRecord(recordId: string): IntakeRecord | undefined {
+    return this.intakeRecords.get(recordId);
   }
 }

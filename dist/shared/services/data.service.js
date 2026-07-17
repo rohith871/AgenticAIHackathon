@@ -9,6 +9,7 @@ import * as fs from 'fs';
 import * as path from 'path';
 let DataService = class DataService {
     seedData = null;
+    intakeRecords = new Map();
     loadSeedData() {
         if (this.seedData) {
             return this.seedData;
@@ -66,6 +67,12 @@ let DataService = class DataService {
                 imageUrl: d.imageUrl
             };
         });
+    }
+    storeIntakeRecord(record) {
+        this.intakeRecords.set(record.recordId, record);
+    }
+    getIntakeRecord(recordId) {
+        return this.intakeRecords.get(recordId);
     }
 };
 DataService = __decorate([

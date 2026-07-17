@@ -1,10 +1,27 @@
-export interface TriageResult {
-    urgency: 'low' | 'medium' | 'high' | 'critical';
-    recommendedSpecialtyId: string;
-    recommendedSpecialtyName: string;
-    notes: string;
-}
+import { DataService } from '../../shared/services/data.service.js';
+import { AnalyzeSymptomsInput, SymptomAnalysisResult, ScoreUrgencyInput, UrgencyResult } from './triage.types.js';
 export declare class TriageService {
-    analyzeSymptoms(symptoms: string[]): TriageResult;
+    private dataService;
+    constructor(dataService: DataService);
+    /**
+     * Analyze patient symptoms to detect red flags and suggest candidate conditions
+     */
+    analyzeSymptoms(input: AnalyzeSymptomsInput): SymptomAnalysisResult;
+    /**
+     * Score urgency level based on symptom analysis
+     */
+    scoreUrgency(input: ScoreUrgencyInput): UrgencyResult;
+    /**
+     * Generate candidate conditions based on symptom keywords
+     */
+    private generateCandidateConditions;
+    /**
+     * Generate human-readable rationale for urgency level
+     */
+    private generateRationale;
+    /**
+     * Generate recommended actions based on urgency level
+     */
+    private generateRecommendedActions;
 }
 //# sourceMappingURL=triage.service.d.ts.map

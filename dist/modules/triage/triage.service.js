@@ -4,81 +4,220 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
     else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
     return c > 3 && r && Object.defineProperty(target, key, r), r;
 };
+var __metadata = (this && this.__metadata) || function (k, v) {
+    if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
+};
 import { Injectable } from '@nitrostack/core';
+import { DataService } from '../../shared/services/data.service.js';
+import { detectRedFlags, calculateSeverityScore, getUrgencyLevel } from './triage-rules.js';
 let TriageService = class TriageService {
-    analyzeSymptoms(symptoms) {
-        const list = symptoms.map(s => s.toLowerCase());
-        // 1. Critical Symptoms - Cardiology / Neurology
-        if (list.some(s => s.includes('chest pain') || s.includes('heart racing') || s.includes('palpitations') || s.includes('cardiac'))) {
-            return {
-                urgency: 'critical',
-                recommendedSpecialtyId: 'cardiology',
-                recommendedSpecialtyName: 'Cardiology',
-                notes: 'Warning: Chest pain or palpitations can be signs of emergency. Please seek immediate medical help or visit the nearest ER.'
-            };
-        }
-        if (list.some(s => s.includes('stroke') || s.includes('numbness') || s.includes('seizure') || s.includes('paralysis') || s.includes('severe headache'))) {
-            return {
-                urgency: 'critical',
-                recommendedSpecialtyId: 'neurology',
-                recommendedSpecialtyName: 'Neurology',
-                notes: 'Critical neurological symptoms detected. Seek emergency medical attention immediately.'
-            };
-        }
-        // 2. High Symptoms - Oncology / Neurology
-        if (list.some(s => s.includes('lump') || s.includes('tumor') || s.includes('unexplained weight loss') || s.includes('cancer'))) {
-            return {
-                urgency: 'high',
-                recommendedSpecialtyId: 'oncology',
-                recommendedSpecialtyName: 'Oncology',
-                notes: 'Symptoms indicate potential oncological concern. Schedule an oncology consult as soon as possible for evaluation.'
-            };
-        }
-        // 3. Medium Symptoms - Orthopedics, Gastroenterology, Pediatrics
-        if (list.some(s => s.includes('fracture') || s.includes('joint pain') || s.includes('bone') || s.includes('sprain') || s.includes('back pain'))) {
-            return {
-                urgency: 'medium',
-                recommendedSpecialtyId: 'orthopedics',
-                recommendedSpecialtyName: 'Orthopedics',
-                notes: 'Bone or joint issue detected. Rest the affected area and consult an orthopedic specialist.'
-            };
-        }
-        if (list.some(s => s.includes('stomach') || s.includes('nausea') || s.includes('vomiting') || s.includes('acid reflux') || s.includes('diarrhea') || s.includes('abdominal'))) {
-            return {
-                urgency: 'medium',
-                recommendedSpecialtyId: 'gastroenterology',
-                recommendedSpecialtyName: 'Gastroenterology',
-                notes: 'Digestive symptoms detected. Maintain hydration and schedule an appointment with a gastroenterologist if symptoms persist.'
-            };
-        }
-        if (list.some(s => s.includes('child') || s.includes('pediatric') || s.includes('baby') || s.includes('toddler') || s.includes('growth delay'))) {
-            return {
-                urgency: 'medium',
-                recommendedSpecialtyId: 'pediatrics',
-                recommendedSpecialtyName: 'Pediatrics',
-                notes: 'Pediatric care recommended. Please consult with a pediatrician for child development or health concerns.'
-            };
-        }
-        // 4. Low Symptoms - Dermatology / General
-        if (list.some(s => s.includes('rash') || s.includes('skin') || s.includes('acne') || s.includes('itching') || s.includes('mole'))) {
-            return {
-                urgency: 'low',
-                recommendedSpecialtyId: 'dermatology',
-                recommendedSpecialtyName: 'Dermatology',
-                notes: 'Skin concern detected. Monitor for changes and schedule an outpatient dermatology consult.'
-            };
-        }
-        // Fallback
+    dataService;
+    constructor(dataService) {
+        this.dataService = dataService;
+    }
+    /**
+     * Analyze patient symptoms to detect red flags and suggest candidate conditions
+     */
+    analyzeSymptoms(input) {
+        const { patientId, symptomDescription } = input;
+        // Detect red flags from symptom text
+        const detectedRedFlags = detectRedFlags(symptomDescription);
+        // Calculate confidence score based on red flags
+        const confidenceScore = calculateSeverityScore(detectedRedFlags);
+        // Generate candidate conditions based on keywords and patterns
+        const candidateConditions = this.generateCandidateConditions(symptomDescription, detectedRedFlags);
         return {
-            urgency: 'low',
-            recommendedSpecialtyId: 'pediatrics', // fallback general
-            recommendedSpecialtyName: 'Pediatrics',
-            notes: 'Symptoms appear mild. Rest, monitor, and contact primary care if you feel worse.'
+            patientId,
+            symptomDescription,
+            detectedRedFlags,
+            candidateConditions,
+            confidenceScore,
+            timestamp: new Date().toISOString()
         };
+    }
+    /**
+     * Score urgency level based on symptom analysis
+     */
+    scoreUrgency(input) {
+        const { analysis } = input;
+        // Calculate severity score from detected red flags
+        const severityScore = calculateSeverityScore(analysis.detectedRedFlags);
+        // Determine urgency level
+        const urgencyLevel = getUrgencyLevel(severityScore);
+        // Generate rationale
+        const rationale = this.generateRationale(analysis.detectedRedFlags, urgencyLevel);
+        // Determine if emergency care is advised
+        const emergencyCareAdvised = urgencyLevel === 'emergency';
+        // Generate recommended actions
+        const recommendedActions = this.generateRecommendedActions(urgencyLevel, analysis.detectedRedFlags);
+        return {
+            urgencyLevel,
+            severityScore,
+            rationale,
+            emergencyCareAdvised,
+            recommendedActions,
+            detectedRedFlags: analysis.detectedRedFlags.map(flag => ({
+                id: flag.id,
+                description: flag.description,
+                severity: flag.severity,
+                category: flag.category
+            }))
+        };
+    }
+    /**
+     * Generate candidate conditions based on symptom keywords
+     */
+    generateCandidateConditions(symptomText, redFlags) {
+        const lowerText = symptomText.toLowerCase();
+        const conditions = [];
+        // Cardiac conditions
+        if (lowerText.includes('chest pain') ||
+            lowerText.includes('palpitations') ||
+            lowerText.includes('heart racing')) {
+            conditions.push({
+                name: 'Acute Coronary Syndrome / Myocardial Infarction',
+                specialty: 'Cardiology',
+                confidence: 0.9,
+                reasoning: 'Chest pain and palpitations are classic cardiac symptoms'
+            });
+        }
+        // Respiratory conditions
+        if (lowerText.includes('shortness of breath') ||
+            lowerText.includes('difficulty breathing') ||
+            lowerText.includes('wheezing')) {
+            conditions.push({
+                name: 'Acute Respiratory Distress / Asthma / Pneumonia',
+                specialty: 'Pulmonology',
+                confidence: 0.85,
+                reasoning: 'Respiratory symptoms indicate pulmonary involvement'
+            });
+        }
+        // Neurological conditions
+        if (lowerText.includes('numbness') ||
+            lowerText.includes('weakness') ||
+            lowerText.includes('paralysis')) {
+            conditions.push({
+                name: 'Stroke / Transient Ischemic Attack',
+                specialty: 'Neurology',
+                confidence: 0.88,
+                reasoning: 'Sudden numbness/weakness are stroke warning signs'
+            });
+        }
+        if (lowerText.includes('severe headache') || lowerText.includes('worst headache')) {
+            conditions.push({
+                name: 'Subarachnoid Hemorrhage / Meningitis',
+                specialty: 'Neurology',
+                confidence: 0.8,
+                reasoning: 'Severe headache can indicate serious neurological condition'
+            });
+        }
+        // Gastrointestinal conditions
+        if (lowerText.includes('severe abdominal pain') ||
+            lowerText.includes('acute abdomen')) {
+            conditions.push({
+                name: 'Acute Abdomen / Appendicitis / Peritonitis',
+                specialty: 'Gastroenterology',
+                confidence: 0.75,
+                reasoning: 'Severe abdominal pain requires urgent evaluation'
+            });
+        }
+        // Allergic/Anaphylaxis
+        if (lowerText.includes('anaphylaxis') ||
+            lowerText.includes('severe allergic') ||
+            lowerText.includes('throat swelling')) {
+            conditions.push({
+                name: 'Anaphylaxis / Severe Allergic Reaction',
+                specialty: 'Emergency Medicine',
+                confidence: 0.95,
+                reasoning: 'Anaphylaxis is a life-threatening emergency'
+            });
+        }
+        // Infectious conditions
+        if (lowerText.includes('high fever') || lowerText.includes('stiff neck')) {
+            conditions.push({
+                name: 'Meningitis / Sepsis',
+                specialty: 'Infectious Disease',
+                confidence: 0.8,
+                reasoning: 'Fever with stiff neck suggests meningitis'
+            });
+        }
+        // Trauma
+        if (lowerText.includes('head injury') ||
+            lowerText.includes('head trauma') ||
+            lowerText.includes('hit head')) {
+            conditions.push({
+                name: 'Traumatic Brain Injury / Intracranial Hemorrhage',
+                specialty: 'Neurology',
+                confidence: 0.85,
+                reasoning: 'Head trauma requires neurological assessment'
+            });
+        }
+        // If no specific conditions matched, return generic assessment
+        if (conditions.length === 0) {
+            conditions.push({
+                name: 'General Medical Evaluation Required',
+                specialty: 'Internal Medicine',
+                confidence: 0.5,
+                reasoning: 'Symptoms require further evaluation by primary care'
+            });
+        }
+        return conditions;
+    }
+    /**
+     * Generate human-readable rationale for urgency level
+     */
+    generateRationale(redFlags, urgencyLevel) {
+        if (urgencyLevel === 'emergency') {
+            const flagDescriptions = redFlags
+                .slice(0, 3)
+                .map(f => f.description)
+                .join(', ');
+            return `EMERGENCY: Critical red flags detected (${flagDescriptions}). Patient requires immediate emergency medical attention.`;
+        }
+        if (urgencyLevel === 'high') {
+            const flagDescriptions = redFlags
+                .slice(0, 2)
+                .map(f => f.description)
+                .join(', ');
+            return `HIGH URGENCY: Serious symptoms detected (${flagDescriptions}). Patient should seek urgent medical evaluation today.`;
+        }
+        if (urgencyLevel === 'medium') {
+            return 'MEDIUM URGENCY: Patient should schedule a medical appointment within 24-48 hours for evaluation.';
+        }
+        return 'LOW URGENCY: Symptoms appear mild. Patient should monitor and contact primary care if symptoms worsen.';
+    }
+    /**
+     * Generate recommended actions based on urgency level
+     */
+    generateRecommendedActions(urgencyLevel, redFlags) {
+        const actions = [];
+        if (urgencyLevel === 'emergency') {
+            actions.push('Call 911 or go to the nearest emergency room immediately');
+            actions.push('Do not drive yourself; use ambulance or have someone drive you');
+            actions.push('Inform emergency staff of all detected red flags');
+            return actions;
+        }
+        if (urgencyLevel === 'high') {
+            actions.push('Seek urgent care or emergency department evaluation today');
+            actions.push('Contact your primary care physician immediately');
+            actions.push('Do not delay seeking medical attention');
+            return actions;
+        }
+        if (urgencyLevel === 'medium') {
+            actions.push('Schedule an appointment with your primary care physician');
+            actions.push('Monitor symptoms closely');
+            actions.push('Seek immediate care if symptoms worsen or new red flags appear');
+            return actions;
+        }
+        actions.push('Monitor symptoms');
+        actions.push('Rest and maintain hydration');
+        actions.push('Contact primary care if symptoms persist or worsen');
+        return actions;
     }
 };
 TriageService = __decorate([
-    Injectable()
+    Injectable({ deps: [DataService] }),
+    __metadata("design:paramtypes", [DataService])
 ], TriageService);
 export { TriageService };
 //# sourceMappingURL=triage.service.js.map
