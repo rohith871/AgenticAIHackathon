@@ -105,6 +105,7 @@ export class GenerateVisitSummaryTool {
         age: 35,
         weight: 75,
         symptoms: ['fever', 'cough'],
+        predictedCondition: 'Acute Respiratory Distress / Asthma / Pneumonia',
         urgencyLevel: 'moderate',
         doctorName: 'Dr. Jane Smith',
         hospitalName: 'City Medical Center',
@@ -132,6 +133,9 @@ export class GenerateVisitSummaryTool {
         throw new Error(`Booking not found: ${input.bookingId}`);
       }
 
+      // Fetch triage result
+      const triageResult = this.dataService.getTriageResult(input.recordId);
+
       // Look up doctor name
       const allDoctors = this.dataService.getDoctors();
       const doctor = allDoctors.find((d) => d.id === booking.doctorId);
@@ -146,7 +150,8 @@ export class GenerateVisitSummaryTool {
         age: intakeRecord.age,
         weight: intakeRecord.weight,
         symptoms: intakeRecord.symptoms,
-        urgencyLevel: intakeRecord.urgency,
+        predictedCondition: triageResult?.predictedCondition || 'Pending triage analysis',
+        urgencyLevel: triageResult?.urgencyLevel || intakeRecord.urgency,
         doctorName,
         hospitalName,
         appointmentSlot: booking.appointmentSlot

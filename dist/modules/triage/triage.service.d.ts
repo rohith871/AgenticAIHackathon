@@ -1,5 +1,5 @@
 import { DataService } from '../../shared/services/data.service.js';
-import { AnalyzeSymptomsInput, SymptomAnalysisResult, ScoreUrgencyInput, UrgencyResult } from './triage.types.js';
+import { AnalyzeSymptomsInput, SymptomAnalysisResult, UrgencyResult } from './triage.types.js';
 export declare class TriageService {
     private dataService;
     constructor(dataService: DataService);
@@ -10,7 +10,7 @@ export declare class TriageService {
     /**
      * Score urgency level based on symptom analysis
      */
-    scoreUrgency(input: ScoreUrgencyInput): UrgencyResult;
+    scoreUrgency(input: any): UrgencyResult;
     /**
      * Generate candidate conditions based on symptom keywords
      */

@@ -19,7 +19,7 @@ let TriageService = class TriageService {
      * Analyze patient symptoms to detect red flags and suggest candidate conditions
      */
     analyzeSymptoms(input) {
-        const { patientId, symptomDescription } = input;
+        const { patientId, recordId, symptomDescription } = input;
         // Detect red flags from symptom text
         const detectedRedFlags = detectRedFlags(symptomDescription);
         // Calculate confidence score based on red flags
@@ -28,6 +28,7 @@ let TriageService = class TriageService {
         const candidateConditions = this.generateCandidateConditions(symptomDescription, detectedRedFlags);
         return {
             patientId,
+            recordId,
             symptomDescription,
             detectedRedFlags,
             candidateConditions,
@@ -39,7 +40,7 @@ let TriageService = class TriageService {
      * Score urgency level based on symptom analysis
      */
     scoreUrgency(input) {
-        const { analysis } = input;
+        const { analysis, recordId } = input;
         // Calculate severity score from detected red flags
         const severityScore = calculateSeverityScore(analysis.detectedRedFlags);
         // Determine urgency level
@@ -50,13 +51,34 @@ let TriageService = class TriageService {
         const emergencyCareAdvised = urgencyLevel === 'emergency';
         // Generate recommended actions
         const recommendedActions = this.generateRecommendedActions(urgencyLevel, analysis.detectedRedFlags);
+        // Determine predicted condition from candidate conditions
+        const predictedCondition = analysis.candidateConditions.length > 0
+            ? analysis.candidateConditions[0].name
+            : 'General Medical Evaluation Required';
+        // Store triage result if recordId is provided
+        if (recordId) {
+            this.dataService.storeTriageResult({
+                patientId: analysis.patientId,
+                recordId,
+                predictedCondition,
+                urgencyLevel,
+                detectedRedFlags: analysis.detectedRedFlags.map((flag) => ({
+                    id: flag.id,
+                    description: flag.description,
+                    severity: flag.severity,
+                    category: flag.category
+                })),
+                confidenceScore: analysis.confidenceScore,
+                timestamp: new Date().toISOString()
+            });
+        }
         return {
             urgencyLevel,
             severityScore,
             rationale,
             emergencyCareAdvised,
             recommendedActions,
-            detectedRedFlags: analysis.detectedRedFlags.map(flag => ({
+            detectedRedFlags: analysis.detectedRedFlags.map((flag) => ({
                 id: flag.id,
                 description: flag.description,
                 severity: flag.severity,

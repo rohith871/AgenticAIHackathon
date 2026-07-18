@@ -46,12 +46,28 @@ interface Booking {
   createdAt: string;
 }
 
+interface TriageResult {
+  patientId: string;
+  recordId?: string;
+  predictedCondition: string;
+  urgencyLevel: string;
+  detectedRedFlags: Array<{
+    id: string;
+    description: string;
+    severity: number;
+    category: string;
+  }>;
+  confidenceScore: number;
+  timestamp: string;
+}
+
 @Injectable()
 export class DataService {
   private seedData: SeedData | null = null;
   private intakeRecords: Map<string, IntakeRecord> = new Map();
   private patients: Map<string, PatientRecord> = new Map();
   private bookings: Map<string, Booking> = new Map();
+  private triageResults: Map<string, TriageResult> = new Map();
 
   private loadSeedData(): SeedData {
     if (this.seedData) {
@@ -188,5 +204,35 @@ export class DataService {
 
   getBooking(bookingId: string): Booking | undefined {
     return this.bookings.get(bookingId);
+  }
+
+  storeTriageResult(input: {
+    patientId: string;
+    recordId?: string;
+    predictedCondition: string;
+    urgencyLevel: string;
+    detectedRedFlags: Array<{
+      id: string;
+      description: string;
+      severity: number;
+      category: string;
+    }>;
+    confidenceScore: number;
+    timestamp: string;
+  }): void {
+    const key = input.recordId || input.patientId;
+    this.triageResults.set(key, {
+      patientId: input.patientId,
+      recordId: input.recordId,
+      predictedCondition: input.predictedCondition,
+      urgencyLevel: input.urgencyLevel,
+      detectedRedFlags: input.detectedRedFlags,
+      confidenceScore: input.confidenceScore,
+      timestamp: input.timestamp
+    });
+  }
+
+  getTriageResult(recordId: string): TriageResult | undefined {
+    return this.triageResults.get(recordId);
   }
 }

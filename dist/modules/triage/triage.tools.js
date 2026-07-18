@@ -37,15 +37,18 @@ __decorate([
         description: 'Analyze patient symptoms to detect red flags, candidate conditions, and confidence score. Takes patient ID and free-text symptom description.',
         inputSchema: z.object({
             patientId: z.string().describe('The unique ID of the patient'),
+            recordId: z.string().optional().describe('The intake record ID (optional, for linking to visit summary)'),
             symptomDescription: z.string().describe('Free-text description of the patient\'s symptoms')
         }),
         examples: {
             request: {
                 patientId: 'patient-001',
+                recordId: 'intake-001',
                 symptomDescription: 'I have severe chest pain and shortness of breath'
             },
             response: {
                 patientId: 'patient-001',
+                recordId: 'intake-001',
                 symptomDescription: 'I have severe chest pain and shortness of breath',
                 detectedRedFlags: [
                     {
@@ -86,6 +89,7 @@ __decorate([
         name: 'score-urgency',
         description: 'Score urgency level (low/medium/high/emergency) based on symptom analysis. Returns a clear rules-engine rationale with red flag severity weights.',
         inputSchema: z.object({
+            recordId: z.string().optional().describe('The intake record ID (optional, for linking to visit summary)'),
             analysis: z.object({
                 patientId: z.string(),
                 symptomDescription: z.string(),
@@ -108,8 +112,10 @@ __decorate([
         }),
         examples: {
             request: {
+                recordId: 'intake-001',
                 analysis: {
                     patientId: 'patient-001',
+                    recordId: 'intake-001',
                     symptomDescription: 'I have severe chest pain and shortness of breath',
                     detectedRedFlags: [
                         {

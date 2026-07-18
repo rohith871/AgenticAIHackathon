@@ -31,6 +31,7 @@ export declare class GenerateVisitSummaryTool {
         age: number;
         weight: number;
         symptoms: string[];
+        predictedCondition: string;
         urgencyLevel: string;
         doctorName: string;
         hospitalName: string;

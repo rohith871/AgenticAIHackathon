@@ -22,7 +22,7 @@ export class TriageService {
    * Analyze patient symptoms to detect red flags and suggest candidate conditions
    */
   analyzeSymptoms(input: AnalyzeSymptomsInput): SymptomAnalysisResult {
-    const { patientId, symptomDescription } = input;
+    const { patientId, recordId, symptomDescription } = input;
 
     // Detect red flags from symptom text
     const detectedRedFlags = detectRedFlags(symptomDescription);
@@ -38,6 +38,7 @@ export class TriageService {
 
     return {
       patientId,
+      recordId,
       symptomDescription,
       detectedRedFlags,
       candidateConditions,
@@ -49,8 +50,8 @@ export class TriageService {
   /**
    * Score urgency level based on symptom analysis
    */
-  scoreUrgency(input: ScoreUrgencyInput): UrgencyResult {
-    const { analysis } = input;
+  scoreUrgency(input: any): UrgencyResult {
+    const { analysis, recordId } = input;
 
     // Calculate severity score from detected red flags
     const severityScore = calculateSeverityScore(analysis.detectedRedFlags);
@@ -67,13 +68,36 @@ export class TriageService {
     // Generate recommended actions
     const recommendedActions = this.generateRecommendedActions(urgencyLevel, analysis.detectedRedFlags);
 
+    // Determine predicted condition from candidate conditions
+    const predictedCondition = analysis.candidateConditions.length > 0
+      ? analysis.candidateConditions[0].name
+      : 'General Medical Evaluation Required';
+
+    // Store triage result if recordId is provided
+    if (recordId) {
+      this.dataService.storeTriageResult({
+        patientId: analysis.patientId,
+        recordId,
+        predictedCondition,
+        urgencyLevel,
+        detectedRedFlags: analysis.detectedRedFlags.map((flag: any) => ({
+          id: flag.id,
+          description: flag.description,
+          severity: flag.severity,
+          category: flag.category
+        })),
+        confidenceScore: analysis.confidenceScore,
+        timestamp: new Date().toISOString()
+      });
+    }
+
     return {
       urgencyLevel,
       severityScore,
       rationale,
       emergencyCareAdvised,
       recommendedActions,
-      detectedRedFlags: analysis.detectedRedFlags.map(flag => ({
+      detectedRedFlags: analysis.detectedRedFlags.map((flag: any) => ({
         id: flag.id,
         description: flag.description,
         severity: flag.severity,

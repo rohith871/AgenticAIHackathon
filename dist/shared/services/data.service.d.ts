@@ -32,11 +32,26 @@ interface Booking {
     appointmentSlot: string;
     createdAt: string;
 }
+interface TriageResult {
+    patientId: string;
+    recordId?: string;
+    predictedCondition: string;
+    urgencyLevel: string;
+    detectedRedFlags: Array<{
+        id: string;
+        description: string;
+        severity: number;
+        category: string;
+    }>;
+    confidenceScore: number;
+    timestamp: string;
+}
 export declare class DataService {
     private seedData;
     private intakeRecords;
     private patients;
     private bookings;
+    private triageResults;
     private loadSeedData;
     getHospitals(): Hospital[];
     getHospitalById(id: string): Hospital | undefined;
@@ -75,6 +90,21 @@ export declare class DataService {
         appointmentSlot: string;
     }): string;
     getBooking(bookingId: string): Booking | undefined;
+    storeTriageResult(input: {
+        patientId: string;
+        recordId?: string;
+        predictedCondition: string;
+        urgencyLevel: string;
+        detectedRedFlags: Array<{
+            id: string;
+            description: string;
+            severity: number;
+            category: string;
+        }>;
+        confidenceScore: number;
+        timestamp: string;
+    }): void;
+    getTriageResult(recordId: string): TriageResult | undefined;
 }
 export {};
 //# sourceMappingURL=data.service.d.ts.map

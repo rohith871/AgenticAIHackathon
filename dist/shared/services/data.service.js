@@ -13,6 +13,7 @@ let DataService = class DataService {
     intakeRecords = new Map();
     patients = new Map();
     bookings = new Map();
+    triageResults = new Map();
     loadSeedData() {
         if (this.seedData) {
             return this.seedData;
@@ -113,6 +114,21 @@ let DataService = class DataService {
     }
     getBooking(bookingId) {
         return this.bookings.get(bookingId);
+    }
+    storeTriageResult(input) {
+        const key = input.recordId || input.patientId;
+        this.triageResults.set(key, {
+            patientId: input.patientId,
+            recordId: input.recordId,
+            predictedCondition: input.predictedCondition,
+            urgencyLevel: input.urgencyLevel,
+            detectedRedFlags: input.detectedRedFlags,
+            confidenceScore: input.confidenceScore,
+            timestamp: input.timestamp
+        });
+    }
+    getTriageResult(recordId) {
+        return this.triageResults.get(recordId);
     }
 };
 DataService = __decorate([
